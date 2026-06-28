@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grow a Garden 2 - Stock Tracker</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1a1a2e;
+            color: #eee;
+            min-height: 100vh;
+        }
+        .header {
+            background: linear-gradient(135deg, #16213e 0%, #0f3460 100%);
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+        .header h1 {
+            font-size: 24px;
+            color: #5ad15a;
+        }
+        .header .countdown-box {
+            background: rgba(255,255,255,0.1);
+            padding: 10px 20px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        .header .countdown-label { font-size: 12px; color: #aaa; }
+        .header .countdown-time { font-size: 28px; font-weight: bold; color: #27e0c8; }
+        .status-dot {
+            display: inline-block;
+            width: 10px; height: 10px;
+            border-radius: 50%;
+            margin-right: 6px;
+            animation: pulse 1.5s infinite;
+        }
+        .status-dot.green { background: #5ad15a; }
+        .status-dot.red { background: #ff5c5c; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+        .tabs {
+            display: flex;
+            gap: 4px;
+            padding: 15px 30px 0;
+            flex-wrap: wrap;
+        }
+        .tab {
+            padding: 10px 22px;
+            background: #16213e;
+            border: none;
+            border-radius: 10px 10px 0 0;
+            color: #aaa;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .tab:hover { background: #0f3460; color: #fff; }
+        .tab.active {
+            background: #0f3460;
+            color: #5ad15a;
+            border-bottom: 2px solid #5ad15a;
+        }
+
+        .content {
+            padding: 20px 30px;
+        }
+        .panel { display: none; }
+        .panel.active { display: block; }
+
+        .stock-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 12px;
+        }
+        .item-card {
+            background: #16213e;
+            border-radius: 12px;
+            padding: 16px;
+            border-left: 4px solid #555;
+            transition: transform 0.2s;
+        }
+        .item-card:hover { transform: translateY(-2px); }
+        .item-card.in-stock { border-left-color: #5ad15a; }
+        .item-card.not-stock { border-left-color: #ff5c5c; opacity: 0.6; }
+        .item-card .name { font-weight: bold; font-size: 16px; margin-bottom: 4px; }
+        .item-card .meta { font-size: 12px; color: #aaa; }
+        .item-card .qty { font-size: 20px; font-weight: bold; color: #27e0c8; }
+
+        .rarity-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: bold;
+            margin-bottom: 6px;
+        }
+        .rarity-Common { background: #9aa6a0; color: #000; }
+        .rarity-Uncommon { background: #5ad15a; color: #000; }
+        .rarity-Rare { background: #2f95ff; color: #000; }
+        .rarity-Epic { background: #9a55f0; color: #fff; }
+        .rarity-Legendary { background: #f0a81e; color: #000; }
+        .rarity-Mythic { background: #ff5c8a; color: #000; }
+        .rarity-Super { background: #27e0c8; color: #000; }
+
+        .merchant-card {
+            background: linear-gradient(135deg, #2d1b4e, #1a1a2e);
+            border: 1px solid #9a55f0;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 10px;
+        }
+        .merchant-card h3 { color: #ff5c8a; margin-bottom: 10px; }
+        .merchant-status { font-size: 14px; color: #aaa; }
+        .merchant-status.active { color: #5ad15a; }
+        .merchant-status.away { color: #ff5c5c; }
+
+        .loading { text-align: center; padding: 60px; color: #aaa; font-size: 18px; }
+        .error { text-align: center; padding: 40px; color: #ff5c5c; }
+        .last-updated { text-align: center; padding: 10px; color: #666; font-size: 12px; }
+
+        @media (max-width: 600px) {
+            .header { flex-direction: column; gap: 10px; }
+            .stock-grid { grid-template-columns: 1fr; }
+            .tabs { padding: 10px 15px 0; }
+            .content { padding: 15px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div>
+            <h1>🌱 Grow a Garden 2 - Stock Tracker</h1>
+            <span id="status"><span class="status-dot green"></span>Live</span>
+        </div>
+        <div class="countdown-box">
+            <div class="countdown-label">Next Restock</div>
+            <div class="countdown-time" id="countdown">--:--</div>
+        </div>
+    </div>
+
+    <div class="tabs">
+        <button class="tab active" data-tab="seeds">🌱 Seeds</button>
+        <button class="tab" data-tab="gear">⚙️ Gear</button>
+        <button class="tab" data-tab="eggs">🥚 Eggs</button>
+        <button class="tab" data-tab="honey">🍯 Honey</button>
+        <button class="tab" data-tab="cosmetics">🎨 Cosmetics</button>
+        <button class="tab" data-tab="merchant">🧳 Merchant</button>
+    </div>
+
+    <div class="content">
+        <div class="panel active" id="panel-seeds">
+            <div class="loading" id="seeds-loading">Loading seed stock...</div>
+            <div class="stock-grid" id="seeds-grid"></div>
+        </div>
+        <div class="panel" id="panel-gear">
+            <div class="loading" id="gear-loading">Loading gear stock...</div>
+            <div class="stock-grid" id="gear-grid"></div>
+        </div>
+        <div class="panel" id="panel-eggs">
+            <div class="loading" id="eggs-loading">Loading egg stock...</div>
+            <div class="stock-grid" id="eggs-grid"></div>
+        </div>
+        <div class="panel" id="panel-honey">
+            <div class="loading" id="honey-loading">Loading honey stock...</div>
+            <div class="stock-grid" id="honey-grid"></div>
+        </div>
+        <div class="panel" id="panel-cosmetics">
+            <div class="loading" id="cosmetics-loading">Loading cosmetics...</div>
+            <div class="stock-grid" id="cosmetics-grid"></div>
+        </div>
+        <div class="panel" id="panel-merchant">
+            <div class="loading" id="merchant-loading">Loading merchant data...</div>
+            <div id="merchant-content"></div>
+        </div>
+    </div>
+
+    <div class="last-updated">Last updated: <span id="last-update">-</span></div>
+
+    <script>
+        const SEED_API = 'https://gag.gg/api/seed-restock';
+        const GAGSTOCK_API = 'https://gagstock.gleeze.com/grow-a-garden';
+
+        const RARITY_COLORS = {
+            Common: '#9aa6a0', Uncommon: '#5ad15a', Rare: '#2f95ff',
+            Epic: '#9a55f0', Legendary: '#f0a81e', Mythic: '#ff5c8a', Super: '#27e0c8'
+        };
+
+        const ALL_SEEDS = [
+            { name: 'Tulip', rarity: 'Uncommon', price: '50' },
+            { name: 'Tomato', rarity: 'Uncommon', price: '25' },
+            { name: 'Apple', rarity: 'Uncommon', price: '100' },
+            { name: 'Bamboo', rarity: 'Rare', price: '500' },
+            { name: 'Corn', rarity: 'Rare', price: '200' },
+            { name: 'Cactus', rarity: 'Rare', price: '1,000' },
+            { name: 'Pineapple', rarity: 'Rare', price: '1,500' },
+            { name: 'Mushroom', rarity: 'Epic', price: '5,000' },
+            { name: 'Green Bean', rarity: 'Epic', price: '250' },
+            { name: 'Banana', rarity: 'Epic', price: '2,000' },
+            { name: 'Grape', rarity: 'Epic', price: '3,000' },
+            { name: 'Coconut', rarity: 'Epic', price: '4,000' },
+            { name: 'Mango', rarity: 'Epic', price: '6,000' },
+            { name: 'Dragon Fruit', rarity: 'Legendary', price: '120,000' },
+            { name: 'Acorn', rarity: 'Legendary', price: '700,000' },
+            { name: 'Cherry', rarity: 'Legendary', price: '1,200,000' },
+            { name: 'Sunflower', rarity: 'Legendary', price: '5,000,000' },
+            { name: 'Venus Fly Trap', rarity: 'Mythic', price: '7,000,000' },
+            { name: 'Pomegranate', rarity: 'Mythic', price: '12,000,000' },
+            { name: 'Poison Apple', rarity: 'Mythic', price: '25,000,000' },
+            { name: 'Moon Bloom', rarity: 'Super', price: '65,000,000' },
+            { name: "Dragon's Breath", rarity: 'Super', price: '90,000,000' }
+        ];
+
+        let windowTimestamp = null;
+        let seedData = null;
+        let gagstockData = null;
+
+        // Tab switching
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
+            });
+        });
+
+        function fmtCountdown() {
+            if (!windowTimestamp) return '--:--';
+            const now = Math.floor(Date.now() / 1000);
+            const nextRestock = windowTimestamp + 300;
+            const diff = nextRestock - now;
+            if (diff <= 0) return '🔄 NOW';
+            const m = Math.floor(diff / 60);
+            const s = diff % 60;
+            return `${m}:${s.toString().padStart(2, '0')}`;
+        }
+
+        function fmtTimeAgo(seconds) {
+            if (seconds < 60) return `${seconds}s ago`;
+            if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+            return `${Math.floor(seconds / 3600)}h ago`;
+        }
+
+        async function fetchSeeds() {
+            try {
+                const r = await fetch(SEED_API);
+                const data = await r.json();
+                windowTimestamp = data.window;
+                seedData = new Map(data.seeds.map(s => [s.name, s]));
+            } catch (e) {
+                console.error('Seed API error:', e);
+            }
+        }
+
+        async function fetchGagstock() {
+            try {
+                const r = await fetch(GAGSTOCK_API);
+                const data = await r.json();
+                gagstockData = data.data;
+            } catch (e) {
+                console.error('Gagstock API error:', e);
+            }
+        }
+
+        function renderSeeds() {
+            const grid = document.getElementById('seeds-grid');
+            const loading = document.getElementById('seeds-loading');
+            if (!seedData) return;
+            loading.style.display = 'none';
+
+            const now = Math.floor(Date.now() / 1000);
+            let html = '';
+
+            for (const seed of ALL_SEEDS) {
+                const data = seedData.get(seed.name);
+                const inStock = data && data.lastStockedAt !== null && now - data.lastStockedAt < 300;
+                const cardClass = inStock ? 'in-stock' : 'not-stock';
+                const qty = inStock ? `x${data.lastQty}` : '0';
+                const lastSeen = data?.lastStockedAt ? fmtTimeAgo(now - data.lastStockedAt) : 'Never';
+
+                html += `
+                    <div class="item-card ${cardClass}">
+                        <span class="rarity-badge rarity-${seed.rarity}">${seed.rarity}</span>
+                        <div class="name">${seed.name}</div>
+                        <div class="qty">${qty}</div>
+                        <div class="meta">${seed.price}s | Last: ${lastSeen}</div>
+                    </div>
+                `;
+            }
+            grid.innerHTML = html;
+        }
+
+        function renderCategory(category, gridId, loadingId, emoji) {
+            const grid = document.getElementById(gridId);
+            const loading = document.getElementById(loadingId);
+            if (!gagstockData) return;
+            loading.style.display = 'none';
+
+            const items = gagstockData[category]?.items || [];
+            if (items.length === 0) {
+                grid.innerHTML = '<div class="loading">No data available</div>';
+                return;
+            }
+
+            let html = '';
+            for (const item of items) {
+                html += `
+                    <div class="item-card in-stock">
+                        <div class="name">${item.emoji || emoji} ${item.name}</div>
+                        <div class="qty">x${item.quantity}</div>
+                    </div>
+                `;
+            }
+            grid.innerHTML = html;
+        }
+
+        function renderMerchant() {
+            const content = document.getElementById('merchant-content');
+            const loading = document.getElementById('merchant-loading');
+            if (!gagstockData) return;
+            loading.style.display = 'none';
+
+            const merchant = gagstockData.travelingmerchant;
+            if (!merchant || !merchant.items || merchant.items.length === 0) {
+                content.innerHTML = '<div class="merchant-card"><h3>🧳 Traveling Merchant</h3><div class="merchant-status away">Not present</div></div>';
+                return;
+            }
+
+            const items = merchant.items.map(i => `${i.emoji || '🧳'} ${i.name} x${i.quantity}`).join('<br>');
+            const status = merchant.appearIn
+                ? `<span class="merchant-status away">Arrives in: ${merchant.appearIn}</span>`
+                : merchant.countdown
+                    ? `<span class="merchant-status active">Leaves in: ${merchant.countdown}</span>`
+                    : '';
+
+            content.innerHTML = `
+                <div class="merchant-card">
+                    <h3>🧳 ${merchant.merchantName || 'Traveling Merchant'}</h3>
+                    <div style="margin: 10px 0">${items}</div>
+                    <div class="merchant-status">${status}</div>
+                </div>
+            `;
+        }
+
+        async function updateAll() {
+            await Promise.all([fetchSeeds(), fetchGagstock()]);
+            renderSeeds();
+            renderCategory('gear', 'gear-grid', 'gear-loading', '⚙️');
+            renderCategory('eggs', 'eggs-grid', 'eggs-loading', '🥚');
+            renderCategory('honey', 'honey-grid', 'honey-loading', '🍯');
+            renderCategory('cosmetics', 'cosmetics-grid', 'cosmetics-loading', '🎨');
+            renderMerchant();
+            document.getElementById('last-update').textContent = new Date().toLocaleTimeString();
+        }
+
+        // Countdown ticker
+        setInterval(() => {
+            document.getElementById('countdown').textContent = fmtCountdown();
+        }, 1000);
+
+        // Fetch every 30 seconds
+        setInterval(updateAll, 30000);
+
+        // Initial load
+        updateAll();
+    </script>
+</body>
+</html>

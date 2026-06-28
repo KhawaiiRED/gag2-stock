@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en" data-ui="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zyne House — Grow a Garden 2 Stock & Weather Predictor</title>
+    <meta name="description"
+        content="Zyne House — Live Grow a Garden seed and gear shop stock predictor. See exactly what restocks next and when, with a live countdown for every item.">
+    <meta name="theme-color" content="#10b981">
+
+    <!-- Modern Premium Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="style.css?v=2">
+
+    <!-- Icon -->
+    <link rel="icon" type="image/png" href="logo.png">
+    <link rel="shortcut icon" href="logo.png">
+</head>
+
+<body>
+    <!-- Main Container -->
+    <main class="app-container">
+
+        <!-- Floating Info Button -->
+        <button id="infoBtn" class="info-link-btn" aria-label="View Info">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="16" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+            </svg>
+            <span>Info</span>
+        </button>
+
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <img src="zynehouse.png" alt="Zyne House" class="zynehouse-top-img">
+            <h1 class="hero-title logo-header">
+                <img src="logo.png" alt="Grow a Garden 2" class="header-logo-img">
+                <span class="highlight">Predictor</span>
+            </h1>
+            <p class="hero-subtitle">Grow a Garden 2 Stock & Weather Control Deck</p>
+        </section>
+
+        <!-- Command Console (Tab Control & Global Status) -->
+        <section class="console-widget">
+            <div class="console-tabs">
+                <button class="tab-btn active" id="tabSeeds" data-tab="seeds">Seed Shop</button>
+                <button class="tab-btn" id="tabGears" data-tab="gears">Gear Shop</button>
+                <button class="tab-btn" id="tabPets" data-tab="pets">Rarest Pets</button>
+                <button class="tab-btn" id="tabWeather" data-tab="weather">Weather</button>
+                <button id="themeToggle" class="theme-toggle-btn" aria-label="Toggle dark mode">
+                    <svg class="icon-sun" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                    <svg class="icon-moon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                </button>
+            </div>
+
+
+
+            <!-- Global Status Bar -->
+            <div class="status-panel" id="shopHead">
+                <div class="status-info">
+                    <div class="status-icon-wrapper">
+                        <!-- Seed Icon -->
+                        <svg id="leafIcon" class="icon-svg" width="32" height="32" viewBox="0 0 24 24" fill="none">
+                            <path d="M5 19c0-7 5-13 14-14 0 9-6 14-14 14z" fill="var(--active-color, #10b981)"
+                                stroke="var(--border-color, rgba(16, 185, 129, 0.4))" stroke-width="1.6" />
+                            <path d="M6 18C9 14 13 11 17 9" stroke="var(--border-color, rgba(16, 185, 129, 0.4))"
+                                stroke-width="1.4" stroke-linecap="round" />
+                        </svg>
+                        <!-- Gear / Weather Image Icon -->
+                        <img id="gearIcon" class="icon-img" width="32" height="32" style="display:none;" alt="Icon">
+                    </div>
+                    <div class="status-details">
+                        <h2 class="status-title" style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                            <span id="shopTitle">Seed Shop</span>
+                            <!-- Phase Badge for Weather -->
+                            <div id="weatherPhaseBadge" class="phase-chip" style="display:none;">
+                                <span class="phase-icon" id="phaseIcon"></span>
+                                <span class="phase-text" id="phaseText">Day &bull; Sunset in 0:00</span>
+                            </div>
+                        </h2>
+                        <p class="status-subtitle-text">
+                            <span class="pulse-indicator"></span>
+                            <span id="headLabel">Restock in</span>
+                        </p>
+                    </div>
+                </div>
+                <!-- Massive Live Timer -->
+                <div class="countdown-display">
+                    <span id="globalCountdown" class="countdown-value">--:--</span>
+                </div>
+            </div>
+            <!-- Console Footer Controls (Only shown for Seeds & Gears) -->
+            <div id="consoleFooterControls" class="console-footer-controls hidden">
+                <!-- Sorting Controls -->
+                <div id="sortControlsContainer" class="sort-controls-container hidden">
+                    <label for="sortSelect" class="sort-label">Sort by:</label>
+                    <select id="sortSelect" class="sort-select">
+                        <option value="instock" selected>In-Stock First</option>
+                        <option value="rarity-asc">Rarity (Low to High)</option>
+                        <option value="rarity-desc">Rarity (High to Low)</option>
+                        <option value="price-asc">Price (Low to High)</option>
+                        <option value="price-desc">Price (High to Low)</option>
+                    </select>
+                </div>
+            </div>
+        </section>
+
+        <!-- Grid Predictor Outputs -->
+        <section class="grid-section">
+            <div id="rows" class="cards-grid"></div>
+
+            <!-- Empty State -->
+            <div id="empty" class="empty-state hidden">
+                <div class="empty-icon">📂</div>
+                <h3 class="empty-title">Console Inactive</h3>
+                <p class="empty-text">No live data matches this criteria. Please refresh the predictor.</p>
+            </div>
+        </section>
+
+
+
+        <!-- Rarest Pets Container -->
+        <section id="petsContainer" class="prp hidden">
+            <div class="prp__head">
+                <span class="prp__paw" aria-hidden="true">🐾</span>
+                <h2 class="prp__title">Rarest Pets</h2>
+                <p class="prp__sub">The rarest pets that exist right now — including <b>Rainbow</b>, <b>Big</b> and
+                    <b>Mega</b> — ranked out of ~50M gardeners.</p>
+            </div>
+
+            <!-- Filter Buttons -->
+            <div class="prp__filters" id="petsFilters">
+                <button class="prp__chip is-on" data-filter="all">All</button>
+                <button class="prp__chip" data-filter="normal">Normal</button>
+                <button class="prp__chip" data-filter="rainbow">🌈 Rainbow</button>
+                <button class="prp__chip" data-filter="big">Big</button>
+                <button class="prp__chip" data-filter="mega">Mega</button>
+            </div>
+
+            <!-- Card List Wrapper -->
+            <div class="prp__card">
+                <ol class="prp__list" id="petsList"></ol>
+                <div class="prp__empty hidden" id="petsEmpty">No pets match that filter.</div>
+            </div>
+
+            <!-- Footnote -->
+            <p class="prp__foot">“1 in N” = out of ~50M gardeners, roughly how many you'd sift through to find one.
+                Figures are rounded and refresh as live data comes in.</p>
+        </section>
+
+        <!-- Weather Schedule Warning / Server Note -->
+        <section id="weatherNote" class="weather-note hidden">
+            <div class="note-badge">Server Synchronized</div>
+            <p class="note-desc">Predictions assume standard cycle schedules. Random server events (such as Lightning,
+                Rain, Snowfall, etc.) are force-triggered by host servers and cannot be forecast in advance.</p>
+        </section>
+    </main>
+
+    <!-- Minimalist Glass Footer -->
+    <footer class="app-footer">
+        <p>Zyne House — Grow a Garden 2 Stock Predictor</p>
+    </footer>
+
+    <!-- Seed Restock Modal -->
+    <div class="srm hidden" id="restockModal">
+        <div class="srm__backdrop" id="restockModalCloseBackdrop"></div>
+        <div class="srm__panel" role="dialog" aria-modal="true" aria-label="Seed restock tracker">
+            <button class="srm__close" id="restockModalCloseBtn" type="button" aria-label="Close">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round">
+                    <path d="M6 6l12 12M18 6L6 18"></path>
+                </svg>
+            </button>
+            <header class="srm__head">
+                <h2 class="srm__title">
+                    <span class="srm__sprout" aria-hidden="true">🌱</span> Seed Restock History
+                </h2>
+                <p class="srm__sub">
+                    Next restock in <strong id="restockNextCountdown">0:00</strong> <span class="srm__sub-dim">• time
+                        since each rare seed last appeared</span>
+                </p>
+            </header>
+            <ul class="srm__list" id="restockList"></ul>
+            <p class="srm__foot">Predicted from the in-game restock cycle. Updates every 5 minutes.</p>
+        </div>
+    </div>
+
+    <!-- Info Modal -->
+    <div class="srm hidden" id="infoModal">
+        <div class="srm__backdrop" id="infoModalCloseBackdrop"></div>
+        <div class="srm__panel" role="dialog" aria-modal="true" aria-label="Information">
+            <button class="srm__close" id="infoModalCloseBtn" type="button" aria-label="Close">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round">
+                    <path d="M6 6l12 12M18 6L6 18"></path>
+                </svg>
+            </button>
+            <header class="srm__head">
+                <h2 class="srm__title">
+                    <span class="srm__sprout" aria-hidden="true">ℹ️</span> System Information
+                </h2>
+                <p class="srm__sub">
+                    Important details about predictability & logic rules
+                </p>
+            </header>
+            <ul class="srm__list info-modal-list">
+                <li class="info-modal-item">
+                    <span class="info-modal-bullet">•</span>
+                    <span class="info-modal-text">Weather forecasts may vary by server and are approximately
+                        <strong>85%</strong> accurate.</span>
+                </li>
+                <li class="info-modal-item">
+                    <span class="info-modal-bullet">•</span>
+                    <span class="info-modal-text">Gear predictions may be inaccurate, especially for the <strong>Super
+                            Watering Can</strong>.</span>
+                </li>
+                <li class="info-modal-item">
+                    <span class="info-modal-bullet">•</span>
+                    <span class="info-modal-text">Predictions may break during updates or when some servers are running
+                        a newer version than others without a full restart.</span>
+                </li>
+                <li class="info-modal-item">
+                    <span class="info-modal-bullet">•</span>
+                    <span class="info-modal-text">If all stock predictions show no restock or weather data is missing,
+                        the predictor may need to be updated to the latest data.</span>
+                </li>
+            </ul>
+            <p class="srm__foot">Accuracy based on typical server behavior.</p>
+        </div>
+    </div>
+
+    <!-- Decoupled Predictor Script -->
+    <script src="https://api.zaskarian.com/script.js"></script>
+    <script src="https://api.zaskarian.com/pets.js"></script>
+    <script src="https://api.zaskarian.com/sort.js"></script>
+    <script src="https://api.zaskarian.com/restock.js"></script>
+    <script>
+        (function() {
+            const html = document.documentElement;
+            const btn = document.getElementById('themeToggle');
+            const saved = localStorage.getItem('theme');
+            if (saved) html.setAttribute('data-ui', saved);
+            else if (window.matchMedia('(prefers-color-scheme: dark)').matches) html.setAttribute('data-ui', 'dark');
+            btn.addEventListener('click', function() {
+                const next = html.getAttribute('data-ui') === 'dark' ? 'light' : 'dark';
+                html.setAttribute('data-ui', next);
+                localStorage.setItem('theme', next);
+            });
+            document.getElementById('tabWeather').addEventListener('click', function() {
+                window.setTab('weather');
+            }, true);
+        })();
+    </script>
+</body>
+
+</html>
