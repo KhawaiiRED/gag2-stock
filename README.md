@@ -8,7 +8,7 @@ Live stock tracker and restock predictor for **Grow a Garden 2** (Roblox).
 - **Restock Countdown** — Per-item countdown timers predicting when each seed will restock
 - **Gear Shop** — Track 19+ gears with predicted restock times
 - **Crates Shop** — Track 15 crates with restock predictions
-- **Weather Events** — Aurora Borealis and other weather event tracking
+- **Weather Events** — Aurora Borealis, Mega Moon, and other weather event tracking
 - **Light/Dark Mode** — Toggle between themes, saved to localStorage
 - **3-Tier Sorting** — In-stock → Next restock (≤5 min) → No stock
 - **Discord Bot** — Slash commands (/setup-stock, /stock, /seed) for Discord integration
@@ -19,7 +19,7 @@ Live stock tracker and restock predictor for **Grow a Garden 2** (Roblox).
 | Site | URL | Description |
 |------|-----|-------------|
 | Stock Tracker | [stocks.zaskarian.com](https://stocks.zaskarian.com) | Original predictor with full sorting & history |
-| Combined Tracker | [49.146.50.99:2315](http://49.146.50.99:2315) | gag.gg live API + static predictions (seeds, gears, crates, weather) |
+| Combined Tracker | [gag2.zaskarian.com](https://gag2.zaskarian.com) | gag.gg live API + static predictions (seeds, gears, crates, weather) |
 | API / JS CDN | [api.zaskarian.com](https://api.zaskarian.com) | Cloudflare Worker serving JS assets & documentation |
 
 ## Tech Stack
@@ -31,7 +31,7 @@ Live stock tracker and restock predictor for **Grow a Garden 2** (Roblox).
 
 ## Project Structure
 
-`
+```
 gag2-stock/
 ├── index.html          # Main stock tracker page
 ├── style.css           # Light/dark theme styling
@@ -46,16 +46,16 @@ gag2-stock/
 ├── sky/                # Sky background assets
 ├── worker.js           # Cloudflare Worker (serves JS via KV)
 └── README.md
-`
+```
 
 ## Discord Bot
 
-`ash
+```bash
 cd /var/www/gag2-bot
 cp .env.example .env    # Fill in bot token & client ID
 npm install
 pm2 start ecosystem.config.js
-`
+```
 
 ### Commands
 
@@ -64,15 +64,6 @@ pm2 start ecosystem.config.js
 | /setup-stock | Create the live stock embed in a channel |
 | /stock | Get current seed stock status |
 | /seed | Look up a specific seed |
-
-## Deployment
-
-`ash
-# Server: 49.146.50.99
-# Web root: /var/www/gag2-stock/ (port 2314)
-# Apache2 serves on ports 80, 2314, 2315
-# PM2 manages the Discord bot process
-`
 
 ## License
 
